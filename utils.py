@@ -14,4 +14,4 @@ MONTHS = [
 ]
 
 def format_date(date):
-    return f'{date.day} {MONTHS[date.month]}'
+    return f'{date.day} {MONTHS[date.month - 1]}'

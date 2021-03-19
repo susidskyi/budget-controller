@@ -30,10 +30,18 @@ def send_balance(message):
 @bot.message_handler(commands=['last_incomes'])
 def send_last_incomes(message):
     incomes = session.query(Incomes).order_by(Incomes.created_at.desc())[:10]
-    message_to_send = '\n'.join([
-        f'{income.user.first_name} *{income.value}* {format_date(income.created_at)}'
+    message_to_send = [
+        f'{income.user.first_name} *{income.value}*'
         for income in incomes
-    ])
+    ]
+
+    max_length = len(max(message_to_send, key=len))
+
+    for i in range(len(message_to_send)):
+        item = message_to_send[i]
+        message_to_send[i] = item + f"`{(max_length - len(item)) * ' '}`" + f" {format_date(incomes[i].created_at)}" 
+
+    message_to_send = '\n'.join(message_to_send)
 
     bot.send_message(
         message.chat.id,
@@ -44,7 +52,15 @@ def send_last_incomes(message):
 @bot.message_handler(commands=['last_expenses'])
 def send_last_expenses(message):
     expenses = session.query(Expenses).order_by(Expenses.created_at.desc())[:10]
-    message_to_send = '\n'.join([f'{expense.name.title()} *{expense.value}*' for expense in expenses])
+    message_to_send =  [f'{expense.name.title()}' for expense in expenses]
+
+    max_length = len(max(message_to_send, key=len))
+
+    for i in range(len(message_to_send)):
+        item = message_to_send[i]
+        message_to_send[i] = item + f"`{(max_length - len(item)) * ' '}`" + f" *{expenses[i].price}*" 
+
+    message_to_send = '\n'.join(message_to_send)
 
     bot.send_message(
         message.chat.id,
@@ -86,7 +102,7 @@ def send_month_expenses(message):
 
     bot.send_message(
         message.chat.id,
-        f'*{expenses}',
+        f'*{expenses}* грн',
         parse_mode='Markdown'
     )
 
