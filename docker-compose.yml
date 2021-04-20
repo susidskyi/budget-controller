@@ -1,0 +1,56 @@
+version: '3.6'
+
+services:
+  postgres:
+    container_name: bot_postgres
+    image: postgres:12
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    
+  bot:
+    container_name: bot_script
+    env_file: .env
+    build: .
+    working_dir: /var/www/bot
+    volumes:
+      - .:/var/www/bot
+    command: python main.py
+    depends_on: 
+      - postgres
+
+  server:
+    container_name: bot_server
+    env_file: .env
+    working_dir: /var/www/server
+    build: 
+      context: .
+      dockerfile: ./budget_info/Dockerfile
+    volumes:
+      - ./budget_info/:/var/www/server
+    command: python3 manage.py runserver 0.0.0.0:8000
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - postgres
+      - bot
+
+  client:
+    container_name: bot_client
+    working_dir: /var/www/client
+    image: node:14
+    command: yarn start
+    env_file: .env
+    volumes: 
+      - ./client/:/var/www/client
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    depends_on:
+      - server
+
+

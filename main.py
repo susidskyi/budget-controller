@@ -142,6 +142,13 @@ def listener(messages):
         chat_id = m.chat.id
         user = session.query(User).filter(User.telegram_id==m.from_user.id).first()
         if not user:
+            first_name = m.from_user.first_name 
+            username = m.from_user.username 
+            if not first_name or username:
+                bot.send_message(
+                    chat_id,
+                    f'Error',
+                )
             user = User(
                 telegram_id=m.from_user.id,
                 first_name=m.from_user.first_name,
