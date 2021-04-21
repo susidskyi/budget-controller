@@ -7,7 +7,7 @@ import { ProgressBar } from 'react-bootstrap';
 import ItemPopup from '../itemPopup';
 import { getExpenses } from '../../actions';
 
-const Expenses = ({ classes, getExpenses, expenses, setTotal, startDate, endDate }) => {
+const Expenses = ({ classes, getExpenses, expenses, setTotal, total, startDate, endDate }) => {
   const [activeItem, setActiveItem] = useState([]);
 
   useEffect(() => {
@@ -15,21 +15,31 @@ const Expenses = ({ classes, getExpenses, expenses, setTotal, startDate, endDate
   }, [getExpenses, startDate, endDate]);
 
   const expensesTotalData = useMemo(() => {
-    const items = { total: 0 };
+    const items = [];
+    var total = 0;
 
     expenses.forEach((item) => {
-      if (items[item.name]) {
-        items[item.name].price += item.price;
+      const obj = items.find((i) => i.name === item.name);
+      if (obj) {
+        obj.price += item.price;
       } else {
-        items[item.name] = {
-          price: item.price,
-        };
+        items.push({ name: item.name, price: item.price });
       }
-      items.total += item.price;
+      total += item.price;
     });
 
-    setTotal(items.total);
-    return items;
+    const sortedItems = items.sort((a, b) => {
+      if (a.price < b.price) {
+        return 1;
+      }
+      if (a.price > b.price) {
+        return -1;
+      }
+      return 0;
+    });
+
+    setTotal(Math.round(total));
+    return sortedItems;
   }, [expenses, setTotal]);
 
   const handleSetActiveItem = (name) => {
@@ -47,27 +57,22 @@ const Expenses = ({ classes, getExpenses, expenses, setTotal, startDate, endDate
       <Grid>
         <p className={classes.itemsListHeaderText}>Список товаров</p>
         <Grid container justify="center">
-          {Object.keys(expensesTotalData)
-            ?.filter((item) => item !== 'total')
-            .map((key) => {
-              const itemPercentage = Math.round(
-                (expensesTotalData[key].price * 100) / expensesTotalData.total,
-                0,
-              );
+          {expensesTotalData.map((item) => {
+            const itemPercentage = Math.round((item.price * 100) / total, 0);
 
-              return (
-                <Grid
-                  item
-                  xs={2}
-                  className={classes.itemBlock}
-                  onClick={() => handleSetActiveItem(key)}
-                >
-                  <p className={classes.itemName}>{key}</p>
-                  <ProgressBar now={itemPercentage} label={`${itemPercentage}%`} />
-                  <p className={classes.itemValue}>{expensesTotalData[key].price} грн</p>
-                </Grid>
-              );
-            })}
+            return (
+              <Grid
+                item
+                xs={2}
+                className={classes.itemBlock}
+                onClick={() => handleSetActiveItem(item.name)}
+              >
+                <p className={classes.itemName}>{item.name}</p>
+                <ProgressBar now={itemPercentage} label={`${itemPercentage}%`} />
+                <p className={classes.itemValue}>{item.price} грн</p>
+              </Grid>
+            );
+          })}
         </Grid>
       </Grid>
       <ItemPopup setActiveItem={setActiveItem} activeItem={activeItem} classes={classes} />
@@ -86,6 +91,7 @@ Expenses.propTypes = {
   setTotal: PropTypes.func.isRequired,
   startDate: PropTypes.string.isRequired,
   endDate: PropTypes.string.isRequired,
+  total: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = (state) => ({

@@ -86,6 +86,7 @@ const Main = () => {
           setTotal={setTotal}
           startDate={startDateToCalculate.format('YYYY-MM-DD')}
           endDate={endDateToCalculate.format('YYYY-MM-DD')}
+          total={total}
         />
       ) : (
         <Incomes
@@ -93,6 +94,7 @@ const Main = () => {
           setTotal={setTotal}
           startDate={startDateToCalculate.format('YYYY-MM-DD')}
           endDate={endDateToCalculate.format('YYYY-MM-DD')}
+          total={total}
         />
       )}
     </>
