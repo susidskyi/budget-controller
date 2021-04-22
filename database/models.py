@@ -2,6 +2,7 @@ import datetime
 import pytz
 
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy.types import ARRAY
 from sqlalchemy.orm import relationship
 from database.conf import Base 
 
@@ -36,6 +37,7 @@ class Expenses(Base):
         autoincrement=True,
         nullable=False
     )
+
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship('User', backref='expense_user', lazy='subquery')
     name = Column(String(50), nullable=False)
@@ -65,3 +67,17 @@ class Incomes(Base):
         nullable=False,
         default=datetime.datetime.now(tz=pytz.timezone('UTC'))
     )
+
+
+class GroupNames(Base):
+    __tablename__ = 'group_names'
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        unique=True,
+        autoincrement=True,
+        nullable=False,
+    )
+    name = Column(String(50), nullable=False)
+    synonyms = Column(ARRAY(String(50)))

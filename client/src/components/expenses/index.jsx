@@ -19,7 +19,11 @@ const Expenses = ({ classes, getExpenses, expenses, setTotal, total, startDate, 
     var total = 0;
 
     expenses.forEach((item) => {
-      const obj = items.find((i) => i.name === item.name);
+      const obj = items.find(
+        (i) =>
+          item.synonyms.map((synonym) => synonym.toLowerCase()).indexOf(i.name.toLowerCase()) !==
+          -1,
+      );
       if (obj) {
         obj.price += item.price;
       } else {
@@ -44,7 +48,10 @@ const Expenses = ({ classes, getExpenses, expenses, setTotal, total, startDate, 
 
   const handleSetActiveItem = (name) => {
     const formatedData = expenses
-      .filter((item) => `${item.name}` === name)
+      .filter(
+        (item) =>
+          item.synonyms.map((synonym) => synonym.toLowerCase()).indexOf(name.toLowerCase()) !== -1,
+      )
       .map((item) => ({
         date: moment(item.created_at).format('DD-MM-YYYY'),
         value: item.price,

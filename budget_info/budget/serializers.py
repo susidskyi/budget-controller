@@ -1,4 +1,4 @@
-from budget.models import Incomes, Expenses, User
+from budget.models import Incomes, Expenses, User, GroupNames
 from rest_framework import serializers
 
 
@@ -17,6 +17,14 @@ class IncomesSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ExpensesSerializer(serializers.HyperlinkedModelSerializer):
+    synonyms = serializers.SerializerMethodField('get_synonyms')
+
     class Meta:
         model = Expenses 
-        fields = ['name', 'price', 'created_at']
+        fields = ['name', 'price', 'created_at', 'synonyms']
+
+    def get_synonyms(self, obj):
+        synonyms = [obj.name]
+        if (qs := GroupNames.objects.filter(synonyms__icontains=obj.name)).exists():
+            synonyms = qs.first().synonyms
+        return synonyms

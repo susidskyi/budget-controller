@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class User(models.Model):
@@ -50,3 +51,16 @@ class Incomes(models.Model):
     
     def __str__(self):
         return f'{self.user.username or self.user.first_name} - {self.value}'
+
+
+class GroupNames(models.Model):
+    name = models.CharField(max_length=50)
+    synonyms = ArrayField(models.CharField(max_length=50))
+
+    class Meta:
+        db_table='group_names'
+        verbose_name = 'Group name'
+        verbose_name_plural = 'Group names'
+    
+    def __str__(self):
+        return self.name
